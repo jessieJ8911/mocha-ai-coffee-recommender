@@ -23,29 +23,27 @@ Mocha AI 是一个基于大语言模型（LLM）和向量检索技术的智能�
 
 ## 🏗️ 系统架构
 
-┌─────────────────────────────────────────────────────────────────┐
-│ Streamlit 前端界面 (端口 8501) │
-│ 用户输入查询 → 卡片式展示推荐结果 │
-└─────────────────────────────────────────────────────────────────┘
-│ HTTP
-▼
-┌─────────────────────────────────────────────────────────────────┐
-│ FastAPI 后端服务 (端口 8000) │
-│ /search → 混合检索 │ /recommend_with_reason → +LLM │
-└─────────────────────────────────────────────────────────────────┘
-│
-▼
-┌─────────────────────────────────────────────────────────────────┐
-│ 核心检索层 (core/) │
-│ 向量生成 (Qwen) │ 混合检索逻辑 │ ChromaDB 向量存储 │
-└─────────────────────────────────────────────────────────────────┘
-│
-▼
-┌─────────────────────────────────────────────────────────────────┐
-│ 数据层 (data/) │
-│ coffee_products.json (30款咖啡) │ reviews.json (评价) │
-│ ──────── ChromaDB 向量数据库 (内存模式) ──────── │
-└─────────────────────────────────────────────────────────────────┘
+```mermaid
+flowchart TD
+    User([👤 用户]) -->|自然语言查询| FE[🖥️ Streamlit 前端界面<br/>端口 8501]
+    FE -->|HTTP 请求| API[⚡ FastAPI 后端服务<br/>端口 8000]
+
+    API -->|POST /search| Core[🔍 核心检索层 core/]
+    API -->|POST /recommend_with_reason| LLM[🤖 大模型 LLM<br/>生成推荐理由]
+
+    Core --> Embed[📐 向量生成<br/>Qwen Embedding]
+    Core --> Ret[🧩 混合检索逻辑<br/>关键词过滤 + 向量排序]
+    Core --> Chroma[💾 ChromaDB 向量存储<br/>内存模式]
+    Core --> Data[📦 数据层 data/]
+
+    Data --> Products[coffee_products.json<br/>30 款咖啡]
+    Data --> Reviews[reviews.json<br/>用户评价]
+
+    style FE fill:#ff4b4b,stroke:#333,stroke-width:2px,color:#fff
+    style API fill:#009688,stroke:#333,stroke-width:2px,color:#fff
+    style Core fill:#f9a825,stroke:#333,stroke-width:2px,color:#fff
+    style Data fill:#42a5f5,stroke:#333,stroke-width:2px,color:#fff
+```
 
 ---
 
@@ -63,23 +61,25 @@ Mocha AI 是一个基于大语言模型（LLM）和向量检索技术的智能�
 ---
 
 ## 📂 项目结构
-coffee-rag-recommender/
-├── data/
-│ ├── coffee_products.json # 30款咖啡产品数据
-│ └── reviews.json # 用户评价数据
-├── core/
-│ ├── embedding.py # 向量生成（Qwen API 封装）
-│ ├── retrieval.py # 混合检索核心逻辑
-│ └── database.py # ChromaDB 连接与数据加载
-├── api/
-│ └── main.py # FastAPI 主文件（/search 接口）
-├── scripts/
-│ ├── load_and_embed.py # 数据向量化并存入 ChromaDB
-│ └── search_test.py # 命令行检索测试
-├── app.py # Streamlit 前端界面
-├── requirements.txt # Python 依赖
-└── README.md # 项目说明
 
+```text
+coffee-rag-recommender/
+├── data/                       # 数据目录
+│   ├── coffee_products.json    # 30 款咖啡产品数据
+│   └── reviews.json            # 用户评价数据
+├── core/                       # 核心检索层
+│   ├── embedding.py            # 向量生成（Qwen API 封装）
+│   ├── retrieval.py            # 混合检索核心逻辑
+│   └── database.py             # ChromaDB 连接与数据加载
+├── api/
+│   └── main.py                 # FastAPI 主文件（/search 接口）
+├── scripts/
+│   ├── load_and_embed.py       # 数据向量化并存入 ChromaDB
+│   └── search_test.py          # 命令行检索测试
+├── app.py                      # Streamlit 前端界面
+├── requirements.txt            # Python 依赖
+└── README.md                   # 项目说明
+```
 
 ---
 
